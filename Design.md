@@ -11,7 +11,7 @@ The cnetstat data processing pipeline looks like this:
 
 ## Pid-to-pod transation
 One of the key things cnetstat needs to do is translate host PIDs to
-Kubernetes container and pod names. I know of two ways of doing this
+Kubernetes container and pod names. We know of two ways of doing this
 pid-to-pod translation.
 
 The Docker way:
@@ -33,8 +33,8 @@ the advantage that it gives all PIDs in a pod, not just the root PID, and
 also that we could cache known UIDs. The Docker way has the advantage that it
 uses public interfaces, instead of implementation details.
 
-I'm using the Docker way because it seems easier to get a proof-of-concept
-with, but I'm not sure what will be better in the long term.
+We're using the Docker way because it seems easier for a
+proof-of-concept, but we are not committed to it for the long term.
 
 ## Net namespaces
 One important design point is that cnetstat builds its pid-to-pod
@@ -57,17 +57,17 @@ This is required for some of the features below.
 ### Track the owning process of TIME_WAIT connections
 When a process closes a connection, it goes into state
 `TIME_WAIT`. netstat doesn't print an associated PID any more (likely
-because the kernel doesn't consider it associated with a PID), but I
-still want to know which process opened it so I can debug processes
+because the kernel doesn't consider it associated with a PID), but we
+still want to know which process opened it so we can debug processes
 that open lots of short-lived connections. We just need to keep our
 own map from connections to PIDs and update it in the polling loop.
 
 ### Use socket open/close events directly
 Instead of using netstat to get the list of open connections every
 time, we should get the list of connections once, at startup, and then
-get a stream of socket open/close events from the kernel. I didn't do
-this initially because I wanted to get cnetstat working quickly, but I
-think this is the right thing to do, both because the algorithmic
+get a stream of socket open/close events from the kernel. We didn't do
+this initially for the sake of getting cnetstat working quickly, but
+it does seem like the right thing to do, both because the algorithmic
 complexity will be better and because it will ensure that we can
 attribute every connection to a process, even if it isn't open when we
 poll open connections.
@@ -75,6 +75,5 @@ poll open connections.
 ### Include a Kubernetes pod specification for running cnetstat as a daemonset
 
 ### Support non-Docker container runtimes
-I don't have an example around to test with, but I would gladly accept
-a pull request for pid-to-pod translation for a non-Docker container
-runtime.
+We would gladly accept a pull request for pid-to-pod translation for a
+non-Docker container runtime.
