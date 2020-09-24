@@ -34,7 +34,8 @@ networking. We hope cnetstat will be helpful to you too.
 
 # Design and Roadmap
 
-See the [design doc](https://github.com/microsoft/cnetstat/Design.md)
+See the [design
+doc](https://github.com/microsoft/cnetstat/blob/main/Design.md).
 
 # Getting Involved
 Is there a feature that would make cnetstat more useful for you? Are
@@ -42,8 +43,8 @@ you hitting a bug? Is the documentation unclear or lacking? Please let
 us know!
 
 See the [contributing
-doc](https://github.com/microsoft/cnetstat/Contributing.md) for the
-details.
+doc](https://github.com/microsoft/cnetstat/blob/main/Contributing.md)
+for the details.
 
 Whether it's a feature, a bug report, or anything else, your
 contributions make cnetstat better for everyone. Thank you.
