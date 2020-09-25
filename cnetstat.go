@@ -23,32 +23,6 @@ type KubeConnection struct {
 	container ContainerPath
 }
 
-// I'm not using the standard json module for JSON output because I
-// want to flatten the KubeConnection before printing it
-func writeKubeConnectionAsJSON(kc *KubeConnection, w io.Writer) error {
-	_, err := fmt.Fprintf(w,
-		"{\"protocol\": %v,"+
-			"\"local_host\": %v, "+
-			"\"local_port\": %v, "+
-			"\"remote_host\": %v, "+
-			"\"remote_port\": %v, "+
-			"\"connection_state\": %v, "+
-			"\"pod_namespace\": %v, "+
-			"\"pod_name\": %v, "+
-			"\"container_name\": %v}",
-		kc.conn.protocol,
-		kc.conn.localHost,
-		kc.conn.localPort,
-		kc.conn.remoteHost,
-		kc.conn.remotePort,
-		kc.conn.connectionState,
-		kc.container.PodNamespace,
-		kc.container.PodName,
-		kc.container.ContainerName)
-
-	return err
-}
-
 const subprocessTimeout = 5 * time.Second
 
 const ppidColon string = "PPid:"
@@ -123,14 +97,6 @@ func getKubeConnections(connections []Connection, pidMap map[int]ContainerPath) 
 	return kubeConnections
 }
 
-// Convert empty strings to "-". Why? Because that's what netstat does
-func emptyToDash(val string) string {
-	if len(val) > 0 {
-		return val
-	} else {
-		return "-"
-	}
-}
 
 var kubeConnectionHeaders = []string{
 	"Namespace", "Pod", "Container", "Protocol",
@@ -140,9 +106,9 @@ var kubeConnectionHeaders = []string{
 
 func (kc KubeConnection) Fields() []string {
 	return []string{
-		emptyToDash(kc.container.PodNamespace),
-		emptyToDash(kc.container.PodName),
-		emptyToDash(kc.container.ContainerName),
+		kc.container.PodNamespace,
+		kc.container.PodName,
+		kc.container.ContainerName,
 		kc.conn.protocol,
 		kc.conn.localHost,
 		kc.conn.localPort,
@@ -227,20 +193,15 @@ func cnetstat() error {
 
 	kubeConnections := getKubeConnections(allConnections, pidMap)
 
+	table := make([]Fielder, len(kubeConnections))
+	for i, _ := range kubeConnections {
+		table[i] = &kubeConnections[i]
+	}
+
 	switch format {
 	case "json":
-		for _, conn := range kubeConnections {
-			err := writeKubeConnectionAsJSON(&conn, os.Stdout)
-			if err != nil {
-				return err
-			}
-			os.Stdout.WriteString("\n")
-		}
+		printJsonTable(table, kubeConnectionHeaders, os.Stdout)
 	case "table":
-		table := make([]Fielder, len(kubeConnections))
-		for i, _ := range kubeConnections {
-			table[i] = &kubeConnections[i]
-		}
 		prettyPrintTable(table, kubeConnectionHeaders, os.Stdout)
 	}
 
