@@ -10,7 +10,6 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -96,7 +95,6 @@ func getKubeConnections(connections []Connection, pidMap map[int]ContainerPath) 
 
 	return kubeConnections
 }
-
 
 var kubeConnectionHeaders = []string{
 	"Namespace", "Pod", "Container", "Protocol",
