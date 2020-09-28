@@ -4,22 +4,18 @@ import (
 	"testing"
 )
 
-// This matches the format of 'sudo lsns --json --type net --output ns,pid,command'
+// This matches the format of 'sudo lsns --type net --output ns,pid'
 
-var lsnsOutput = []byte(`
-{
-   "namespaces": [
-      {"ns": "23", "pid": "1", "command": "/sbin/init"},
-      {"ns": "24", "pid": "96", "command": "/pause"},
-      {"ns": "25", "pid": "284", "command": "/pause"}
-   ]
-}
+var lsnsOutput = []byte(`  NS   PID
+2342     1
+9694   893
+8766  3929
 `)
 
 var lsnsCorrectParse = []NamespaceData{
-	NamespaceData{Ns: "23", Pid: "1", Command: "/sbin/init"},
-	NamespaceData{Ns: "24", Pid: "96", Command: "/pause"},
-	NamespaceData{Ns: "25", Pid: "284", Command: "/pause"},
+	NamespaceData{Ns: 2342, Pid: 1},
+	NamespaceData{Ns: 9694, Pid: 893},
+	NamespaceData{Ns: 8766, Pid: 3929},
 }
 
 func TestParseLsnsOutput(t *testing.T) {

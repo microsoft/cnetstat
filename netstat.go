@@ -36,21 +36,6 @@ func hostAndPort(address string) (string, string, error) {
 	return address[:split], address[split+1:], nil
 }
 
-func stringSlicesEqual(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-
-	for i, a_elt := range a {
-		b_elt := b[i]
-		if a_elt != b_elt {
-			return false
-		}
-	}
-
-	return true
-}
-
 // Parse the output of 'sudo netstat --tcp --program'
 var expectedHeaderFields = []string{
 	"Proto", "Recv-Q", "Send-Q", "Local", "Address", "Foreign",
