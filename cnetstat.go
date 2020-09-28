@@ -166,7 +166,7 @@ func cnetstat() error {
 	// connections has one slice of Connections for each namespace
 	var connections = make([][]Connection, len(namespaces))
 	for i, namespace := range namespaces {
-		conns, err := getConnectionsFromNamespace(namespace.Pid)
+		conns, err := getConnectionsFromNamespace(strconv.Itoa(namespace.Pid))
 		if err != nil {
 			return err
 		}
@@ -190,6 +190,7 @@ func cnetstat() error {
 	}
 
 	kubeConnections := getKubeConnections(allConnections, pidMap)
+	println("Got", len(kubeConnections), "kubeConnections")
 
 	table := make([]Fielder, len(kubeConnections))
 	for i, _ := range kubeConnections {
