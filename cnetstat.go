@@ -96,6 +96,59 @@ func getKubeConnections(connections []Connection, pidMap map[int]ContainerPath) 
 	return kubeConnections
 }
 
+// Like the TCP 4-tuple, but with a ContainerPath for the local side
+type KubeConnectionId struct {
+	container ContainerPath
+	remoteHost string
+	remotePort string
+}
+
+type ConnectionCount struct {
+	connId KubeConnectionId
+	count int
+}
+
+func summarizeKubeConnections(connections []KubeConnection) []ConnectionCount {
+	stats := make(map[KubeConnectionId]int)
+
+	for _, conn := range connections {
+		connId := KubeConnectionId{container: conn.container,
+				remoteHost: conn.conn.remoteHost,
+				remotePort: conn.conn.remotePort}
+		count, ok := stats[connId]
+
+		if ok {
+			stats[connId] = count + 1
+		} else {
+			stats[connId] = 1
+		}
+	}
+
+	result := make([]ConnectionCount, len(stats))
+	index := 0
+	for k, v := range stats {
+		result[index] = ConnectionCount{k, v}
+		index += 1
+	}
+
+	return result
+}
+
+var connectionStatFields = []string{
+	"Namespace", "Pod", "Container", "Remote Host", "Remote Port", "Count",
+}
+
+func (cc ConnectionCount) Fields() []string {
+	return []string{
+		cc.connId.container.PodNamespace,
+		cc.connId.container.PodName,
+		cc.connId.container.ContainerName,
+		cc.connId.remoteHost,
+		cc.connId.remotePort,
+		strconv.Itoa(cc.count),
+	}
+}
+
 var kubeConnectionHeaders = []string{
 	"Namespace", "Pod", "Container", "Protocol",
 	"Local Host", "Local Port", "Remote Host", "Remote Port",
@@ -116,30 +169,38 @@ func (kc KubeConnection) Fields() []string {
 	}
 }
 
+type CnetstatConfig struct {
+	outputFormat string  // Either "table" or "json"
+	summaryStats bool
+}
+
 // Parse our arguments. Return the value of the format argument - either "table" or "json"
-func parseArgs() (string, error) {
-	var format = flag.String("format", "table", "Output format. Either 'table' or 'json'")
+func parseArgs() (CnetstatConfig, error) {
+	var config CnetstatConfig
+
+	flag.StringVar(&config.outputFormat, "format", "table", "Output format. Either 'table' or 'json'")
+	flag.BoolVar(&config.summaryStats, "summaryStatistics", true, "Print summary statistics rather than all connections")
 
 	flag.Parse()
 
 	// If we got any positional arguments, that's a user error
 	if len(flag.Args()) > 0 {
 		flag.Usage()
-		return "", fmt.Errorf("got extra arguments %v", flag.Args())
+		return config, fmt.Errorf("got extra arguments %v", flag.Args())
 	}
 
-	if (*format != "table") && (*format != "json") {
+	if (config.outputFormat != "table") && (config.outputFormat != "json") {
 		flag.Usage()
-		return "", fmt.Errorf("unrecognized format %v", format)
+		return config, fmt.Errorf("unrecognized format %v", config.outputFormat)
 	}
 
-	return *format, nil
+	return config, nil
 }
 
 // This is effectively main, but moving it to a separate function
 // makes the error handling simpler
 func cnetstat() error {
-	format, err := parseArgs()
+	config, err := parseArgs()
 	if err != nil {
 		return err
 	}
@@ -192,16 +253,28 @@ func cnetstat() error {
 	kubeConnections := getKubeConnections(allConnections, pidMap)
 	println("Got", len(kubeConnections), "kubeConnections")
 
-	table := make([]Fielder, len(kubeConnections))
-	for i, _ := range kubeConnections {
-		table[i] = &kubeConnections[i]
+	var table []Fielder
+	var columns []string
+	if (config.summaryStats) {
+		stats := summarizeKubeConnections(kubeConnections)
+		table = make([]Fielder, len(stats))
+		for i, _ := range stats {
+			table[i] = &stats[i]
+		}
+		columns = connectionStatFields
+	} else {
+		table = make([]Fielder, len(kubeConnections))
+		for i, _ := range kubeConnections {
+			table[i] = &kubeConnections[i]
+		}
+		columns = kubeConnectionHeaders
 	}
 
-	switch format {
+	switch config.outputFormat {
 	case "json":
-		printJsonTable(table, kubeConnectionHeaders, os.Stdout)
+		printJsonTable(table, columns, os.Stdout)
 	case "table":
-		prettyPrintTable(table, kubeConnectionHeaders, os.Stdout)
+		prettyPrintTable(table, columns, os.Stdout)
 	}
 
 	return nil
