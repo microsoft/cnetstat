@@ -169,12 +169,13 @@ func (kc KubeConnection) Fields() []string {
 	}
 }
 
+// CnetstatConfig holds our command-line arguments
 type CnetstatConfig struct {
 	outputFormat string // Either "table" or "json"
 	summaryStats bool
 }
 
-// Parse our arguments. Return the value of the format argument - either "table" or "json"
+// Parse our arguments
 func parseArgs() (CnetstatConfig, error) {
 	var config CnetstatConfig
 
