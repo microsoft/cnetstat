@@ -98,14 +98,14 @@ func getKubeConnections(connections []Connection, pidMap map[int]ContainerPath) 
 
 // Like the TCP 4-tuple, but with a ContainerPath for the local side
 type KubeConnectionId struct {
-	container ContainerPath
+	container  ContainerPath
 	remoteHost string
 	remotePort string
 }
 
 type ConnectionCount struct {
 	connId KubeConnectionId
-	count int
+	count  int
 }
 
 func summarizeKubeConnections(connections []KubeConnection) []ConnectionCount {
@@ -113,8 +113,8 @@ func summarizeKubeConnections(connections []KubeConnection) []ConnectionCount {
 
 	for _, conn := range connections {
 		connId := KubeConnectionId{container: conn.container,
-				remoteHost: conn.conn.remoteHost,
-				remotePort: conn.conn.remotePort}
+			remoteHost: conn.conn.remoteHost,
+			remotePort: conn.conn.remotePort}
 		count, ok := stats[connId]
 
 		if ok {
@@ -170,7 +170,7 @@ func (kc KubeConnection) Fields() []string {
 }
 
 type CnetstatConfig struct {
-	outputFormat string  // Either "table" or "json"
+	outputFormat string // Either "table" or "json"
 	summaryStats bool
 }
 
@@ -255,7 +255,7 @@ func cnetstat() error {
 
 	var table []Fielder
 	var columns []string
-	if (config.summaryStats) {
+	if config.summaryStats {
 		stats := summarizeKubeConnections(kubeConnections)
 		table = make([]Fielder, len(stats))
 		for i, _ := range stats {

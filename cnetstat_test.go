@@ -17,40 +17,40 @@ func TestSummarize(t *testing.T) {
 	// Two connections each to two different remote endpoints
 	conns := []Connection{
 		Connection{
-			protocol: "tcp",
-			localHost: "127.0.0.1",
-			localPort: "https",
-			remoteHost: "10.0.5.9",
-			remotePort: "5086",
+			protocol:        "tcp",
+			localHost:       "127.0.0.1",
+			localPort:       "https",
+			remoteHost:      "10.0.5.9",
+			remotePort:      "5086",
 			connectionState: "ESTABLISHED",
-			pid: 42,
+			pid:             42,
 		},
 		Connection{
-			protocol: "tcp",
-			localHost: "127.0.0.1",
-			localPort: "5069",
-			remoteHost: "10.0.5.9",
-			remotePort: "5086",
+			protocol:        "tcp",
+			localHost:       "127.0.0.1",
+			localPort:       "5069",
+			remoteHost:      "10.0.5.9",
+			remotePort:      "5086",
 			connectionState: "TIME_WAIT",
-			pid: 85,
+			pid:             85,
 		},
 		Connection{
-			protocol: "tcp6",
-			localHost: "127.0.0.1",
-			localPort: "1234",
-			remoteHost: "10.0.3.4",
-			remotePort: "6230",
+			protocol:        "tcp6",
+			localHost:       "127.0.0.1",
+			localPort:       "1234",
+			remoteHost:      "10.0.3.4",
+			remotePort:      "6230",
 			connectionState: "ESTABLISHED",
-			pid: 42,
+			pid:             42,
 		},
 		Connection{
-			protocol: "tcp6",
-			localHost: "127.0.0.1",
-			localPort: "5982",
-			remoteHost: "10.0.3.4",
-			remotePort: "6230",
+			protocol:        "tcp6",
+			localHost:       "127.0.0.1",
+			localPort:       "5982",
+			remoteHost:      "10.0.3.4",
+			remotePort:      "6230",
 			connectionState: "ESTABLISHED",
-			pid: 85,
+			pid:             85,
 		},
 	}
 
@@ -60,75 +60,75 @@ func TestSummarize(t *testing.T) {
 		KubeConnection{
 			conn: conns[0],
 			container: ContainerPath{
-				PodNamespace: "myapp",
-				PodName: "frontend",
+				PodNamespace:  "myapp",
+				PodName:       "frontend",
 				ContainerName: "fe-server",
 			},
 		},
 		KubeConnection{
 			conn: conns[1],
 			container: ContainerPath{
-				PodNamespace: "myapp",
-				PodName: "frontend",
+				PodNamespace:  "myapp",
+				PodName:       "frontend",
 				ContainerName: "fe-server",
 			},
 		},
 		KubeConnection{
 			conn: conns[2],
 			container: ContainerPath{
-				PodNamespace: "myapp",
-				PodName: "frontend",
+				PodNamespace:  "myapp",
+				PodName:       "frontend",
 				ContainerName: "fe-server",
 			},
 		},
 		KubeConnection{
 			conn: conns[3],
 			container: ContainerPath{
-				PodNamespace: "myapp",
-				PodName: "frontend",
+				PodNamespace:  "myapp",
+				PodName:       "frontend",
 				ContainerName: "log-shipper",
 			},
 		},
 	}
 
 	expectedStats := []ConnectionCount{
-			ConnectionCount{
-				connId: KubeConnectionId{
-					container: ContainerPath{
-						PodNamespace: "myapp",
-						PodName: "frontend",
-						ContainerName: "fe-server",
-					},
-					remoteHost: "10.0.5.9",
-					remotePort: "5086",
+		ConnectionCount{
+			connId: KubeConnectionId{
+				container: ContainerPath{
+					PodNamespace:  "myapp",
+					PodName:       "frontend",
+					ContainerName: "fe-server",
 				},
-				count: 2,
+				remoteHost: "10.0.5.9",
+				remotePort: "5086",
 			},
-			ConnectionCount{
-				connId: KubeConnectionId{
-					container: ContainerPath{
-						PodNamespace: "myapp",
-						PodName: "frontend",
-						ContainerName: "fe-server",
-					},
-					remoteHost: "10.0.3.4",
-					remotePort: "6230",
+			count: 2,
+		},
+		ConnectionCount{
+			connId: KubeConnectionId{
+				container: ContainerPath{
+					PodNamespace:  "myapp",
+					PodName:       "frontend",
+					ContainerName: "fe-server",
 				},
-				count: 1,
+				remoteHost: "10.0.3.4",
+				remotePort: "6230",
 			},
-			ConnectionCount{
-				connId: KubeConnectionId{
-					container: ContainerPath{
-						PodNamespace: "myapp",
-						PodName: "frontend",
-						ContainerName: "log-shipper",
-					},
-					remoteHost: "10.0.3.4",
-					remotePort: "6230",
+			count: 1,
+		},
+		ConnectionCount{
+			connId: KubeConnectionId{
+				container: ContainerPath{
+					PodNamespace:  "myapp",
+					PodName:       "frontend",
+					ContainerName: "log-shipper",
 				},
-				count: 1,
+				remoteHost: "10.0.3.4",
+				remotePort: "6230",
 			},
-		}
+			count: 1,
+		},
+	}
 
 	stats := summarizeKubeConnections(kubeConns)
 
