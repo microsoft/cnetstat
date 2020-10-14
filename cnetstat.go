@@ -26,6 +26,13 @@ const subprocessTimeout = 5 * time.Second
 
 const ppidColon string = "PPid:"
 
+// How we format our output
+type Format int
+const (
+	tableFormat Format = iota
+	jsonFormat
+)
+
 // Either return the parent PID of its argument, or an error
 func parentOfPid(pid int) (int, error) {
 	fp, err := os.Open(fmt.Sprintf("/proc/%d/status", pid))
@@ -171,15 +178,16 @@ func (kc KubeConnection) Fields() []string {
 
 // CnetstatConfig holds our command-line arguments
 type CnetstatConfig struct {
-	outputFormat string // Either "table" or "json"
+	outputFormat Format
 	summaryStats bool
 }
 
 // Parse our arguments
 func parseArgs() (CnetstatConfig, error) {
 	var config CnetstatConfig
+	var formatStr string
 
-	flag.StringVar(&config.outputFormat, "format", "table", "Output format. Either 'table' or 'json'")
+	flag.StringVar(&formatStr, "format", "table", "Output format. Either 'table' or 'json'")
 	flag.BoolVar(&config.summaryStats, "summaryStatistics", true, "Print summary statistics rather than all connections")
 
 	flag.Parse()
@@ -190,9 +198,15 @@ func parseArgs() (CnetstatConfig, error) {
 		return config, fmt.Errorf("got extra arguments %v", flag.Args())
 	}
 
-	if (config.outputFormat != "table") && (config.outputFormat != "json") {
+	// Convert the string representation of our format to a Format
+	switch formatStr {
+	case "table":
+		config.outputFormat = tableFormat
+	case "json":
+		config.outputFormat = jsonFormat
+	default:
 		flag.Usage()
-		return config, fmt.Errorf("unrecognized format %v", config.outputFormat)
+		return config, fmt.Errorf("unrecognized format %v", formatStr)
 	}
 
 	return config, nil
@@ -272,9 +286,9 @@ func cnetstat() error {
 	}
 
 	switch config.outputFormat {
-	case "json":
+	case jsonFormat:
 		printJsonTable(table, columns, os.Stdout)
-	case "table":
+	case tableFormat:
 		prettyPrintTable(table, columns, os.Stdout)
 	}
 
