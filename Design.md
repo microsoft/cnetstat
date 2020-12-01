@@ -52,8 +52,6 @@ host or non-Docker container systems.
 ### Add an option to run in a loop and print connections periodically
 This is required for some of the features below.
 
-### Add an option to print summary statistics instead of a connection list
-
 ### Track the owning process of TIME_WAIT connections
 When a process closes a connection, it goes into state
 `TIME_WAIT`. netstat doesn't print an associated PID any more (likely

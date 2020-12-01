@@ -4,9 +4,13 @@ Kubernetes container and pod names if they are from a container. It
 currently assumes that the containers run on Docker, with labels in
 the format that my version of Kubelet uses.
 
-Use it like this (from the repository root directory):
+To get an x86-64 binary, download the latest release like this:
 ```
-go build
+curl -L https://github.com/microsoft/cnetstat/releases/latest/download/cnetstat.x86_64 > cnetstat
+```
+
+and then run it like this:
+```
 sudo ./cnetstat
 ```
 
@@ -22,6 +26,13 @@ If you want JSON output, try this:
 ```
 sudo ./cnetstat --format=json
 ```
+
+If you want to count connections per origin/destination pair, use the
+`--summaryStatistics` option.
+
+(To run on other architectures, you'll need to build from
+source. There are instructions in the [contributing
+doc](https://github.com/microsoft/cnetstat/blob/main/Contributing.md).
 
 # Why cnetstat?
 We built cnetstat to help figure out which containers in a Kubernetes
