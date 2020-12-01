@@ -23,6 +23,9 @@ If you want JSON output, try this:
 sudo ./cnetstat --format=json
 ```
 
+If you want to count connections per origin/destination pair, use the
+`--summaryStatistics` option.
+
 # Why cnetstat?
 We built cnetstat to help figure out which containers in a Kubernetes
 cluster were using up TCP ports by opening lots of short-lived
