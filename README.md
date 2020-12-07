@@ -9,6 +9,11 @@ To get an x86-64 binary, download the latest release like this:
 curl -L https://github.com/microsoft/cnetstat/releases/latest/download/cnetstat.x86_64 > cnetstat
 ```
 
+Make it executable:
+```
+chmod +x ./cnetstat
+```
+
 and then run it like this:
 ```
 sudo ./cnetstat
